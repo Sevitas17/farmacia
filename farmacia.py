@@ -1,5 +1,6 @@
 #Agregar Producto
 inventario= {}
+ventas = []
 
 
 def agregarProducto(inventario):
@@ -23,6 +24,7 @@ def obtenerPrecio():
                 return precios
             else:
                 print("Precio debe ser un valor positivo")
+                
 def obtenerCantidad():
     while True:
         cantidad=int(input("Cantidad: "))
@@ -89,6 +91,97 @@ def actualizarCantidad(inventario,codigo):
     inventario[codigo]["cantidad"]=nuevaCantidad
     print("Cantidad Actualizada")
 
+def registrarVenta(inventario, ventas):
+    if len(inventario) == 0:
+        print("No existen productos")
+        return
+
+    cliente = input("Nombre del cliente: ")
+    detalleVenta = []
+    subtotal = 0
+
+    while True:
+        codigo = input("Ingrese el código del producto o escribir - para salir : ")
+        if codigo == "-":
+            break
+
+        if codigo not in inventario:
+            print("Error de codigo , intente de nuevo")
+            continue
+
+        producto = inventario[codigo]
+        cantidadDisponible = producto["cantidad"]
+        print(f"Disponible: {cantidadDisponible}, Precio unitario: {producto['precio']}")
+
+        cantidadVendida = obtenerCantidad()
+
+        if cantidadVendida > cantidadDisponible:
+            print("No hay suficiente cantidad disponible para esa venta")
+            continue
+
+        totalproducto = cantidadVendida * producto["precio"]
+        subtotal += totalproducto
+
+        inventario[codigo]["cantidad"] -= cantidadVendida
+
+        detalleVenta.append({
+            "codigo": codigo,
+            "nombre": producto["nombre"],
+            "cantidad": cantidadVendida,
+            "precioUnitario": producto["precio"],
+            "totalproducto": totalproducto,
+        })
+
+        print("Producto agregado a la venta")
+
+    if len(detalleVenta) == 0:
+        print("Error no se seleccionaron productos")
+        return
+
+    valorIva = subtotal * 0.15
+    total = subtotal + valorIva
+
+    venta = {
+        "cliente": cliente,
+        "detalle": detalleVenta,
+        "subtotal": subtotal,
+        "iva": valorIva,
+        "total": total,
+    }
+    ventas.append(venta)
+    imprimirFactura(venta)
+
+
+def imprimirFactura(venta):
+    print("\n********* FACTURA ********")
+    print("Cliente:", venta["cliente"])
+    print("*************************")
+    for item in venta["detalle"]:
+        print(f"{item['nombre']} x {item['cantidad']}  =  ${item['totalproducto']:.2f}")
+    print("----------------------------")
+    print(f"Subtotal:  ${venta['subtotal']:.2f}")
+    print(f"IVA (15%): ${venta['iva']:.2f}")
+    print(f"TOTAL:     ${venta['total']:.2f}")
+    print("*************************")
+
+def consultarInventario(inventario):
+    if len(inventario) == 0:
+        print("No existe productos en inventario")
+        return
+    
+    print("\n****Inventario*****")
+    for codigo, productos in inventario.items():
+        print("****************")
+        print("Codigo: ", codigo)
+        print("Nombre: ", productos["nombre"])
+        print("Cantidad: ", productos["cantidad"])   
+        if productos["cantidad"] == 0:
+            print("AGOTADO")
+        else:
+            print("DISPONIBLE")
+
+        
+
 
 
 def menu():
@@ -117,3 +210,9 @@ while True:
         buscarProducto(inventario,codigo)
     elif opciones==4:
         actualizarProducto(inventario)
+    elif opciones==5:
+        registrarVenta(inventario, ventas)
+    elif opciones==6:
+        consultarInventario(inventario)
+    else:
+        print("\nOpcion no valida.")
