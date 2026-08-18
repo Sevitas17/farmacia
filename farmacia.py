@@ -181,8 +181,37 @@ def consultarInventario(inventario):
             print("DISPONIBLE")
 
         
-
-
+def reporteVentas(ventas):
+    if len(ventas) == 0:
+        print("No hay ventas registradas para generar el reporte.")
+        return
+    print("\n*****REPORTE DE VENTAS****")
+    productos_vendidos = {}
+    total_subtotal = 0
+    total_iva = 0
+    total_general = 0
+    for venta in ventas:
+        total_subtotal += venta["subtotal"]
+        total_iva += venta["iva"]
+        total_general += venta["total"]
+        
+        for item in venta["detalle"]:
+            nombre = item["nombre"]
+            cantidad = item["cantidad"]
+            
+            if nombre in productos_vendidos:
+                productos_vendidos[nombre] += cantidad
+            else:
+                productos_vendidos[nombre] = cantidad
+                
+    print(f"Total de facturas emitidas: {len(ventas)}")
+    print(f"Subtotal acumulado:  ${total_subtotal:.2f}")
+    print(f"IVA (15%) acumulado: ${total_iva:.2f}")
+    print(f"TOTAL RECAUDADO:     ${total_general:.2f}")
+    
+def salirMenu():
+    print("\n****Gracias por usar el programa****")
+    return False
 
 def menu():
     print("\n*****MENU*******")
@@ -214,5 +243,9 @@ while True:
         registrarVenta(inventario, ventas)
     elif opciones==6:
         consultarInventario(inventario)
+    elif opciones == 7:
+        reporteVentas(ventas)
+    elif opciones == 8:
+        salirMenu()
     else:
         print("\nOpcion no valida.")
